@@ -1,0 +1,14 @@
+# --- lo que se compila (nunca se sube: cada quien lo genera) ---
+dungeon
+dungeon.exe
+bin/
+*.o
+*.exe
+
+# --- lo que genera el juego al correr ---
+salida/
+
+# --- basura del sistema y del editor ---
+.DS_Store
+Thumbs.db
+.vscode/
