@@ -1,203 +1,106 @@
 # Dungeon Quest
 
-Un solo proyecto en C que construyes **a lo largo de todo el semestre**. Cada semana le agregas una
-pieza nueva; al final tienes un juego completo, escrito por ti, de varios miles de líneas.
+Informe de el progreso del proyecto. Cada sección cuenta qué implementé, cómo lo resolví y si compiló y funcionó.
 
-> Este repositorio es tuyo. No es una tarea que se entrega y se olvida: lo que escribas en la
-> semana 6 lo vas a seguir usando en la semana 16.
+Repositorio: https://github.com/vdelmoral2030im/dungeon-quest
 
 ---
 
-## Primeros pasos: convierte esta carpeta en TU repositorio
+## Lab 06 — La Forja
 
-El profesor te dio esta plantilla en un `.zip`. Todavía no es un repositorio: es una carpeta
-normal. Lo conviertes tú, **una sola vez**, el primer día.
+### Hechizos (hechizos.c)
 
-> La guía completa, paso a paso, es `guia_git_github.md` (te la dio el profesor
-> junto con el zip). Aquí va el resumen.
+Traduje a C los cuatro algoritmos que hice en Python en el Lab 01:
 
-### 1. Descomprime y comprueba que compila
+- mcd: el algoritmo de Euclides. En Python se hace con a, b = b, a % b, pero en C eso no existe, así que usé una variable temporal (temp) para guardar el b viejo antes de cambiarlo. Si no, el a terminaba usando el b nuevo y daba mal.
 
-1. Descomprime el zip en un lugar fácil de encontrar, por ejemplo `Documentos\dungeon-quest`.
-2. Abre **la carpeta** en VS Code (no los archivos sueltos).
-3. Compila y prueba (ver *Compilar y probar*, más abajo). Debe abrir el menú de La Posada y las
-   pruebas deben decir `4 de 18`.
+- fibonacci: versión iterativa con long long, porque F(92) ya tiene 19 dígitos y no cabe en un int.
 
-**No sigas hasta que compile.** Si algo falla aquí, el problema es el compilador, no git.
+- simple_loop y double_loop: los dos lazos que cuentan vueltas. El primero es lineal y el segundo cuadrático.
 
-### 2. Crea el repositorio en tu computador y publícalo
 
-**Con GitHub Desktop** (recomendado en el laboratorio: no pide permisos de administrador):
+### Cronómetro (cronometro.c)
 
-1. **File → Add local repository** y elige la carpeta `dungeon-quest`.
-2. Te dirá que no es un repositorio. Pulsa **create a repository** y luego **Create repository**.
-   Esto hace tu primer *commit* con todos los archivos.
-3. Pulsa **Publish repository**. Deja el nombre `dungeon-quest` y **marca "Keep this code
-   private"**. Publica.
+Escribí cronometro_tabla, que mide simple_loop con n = 1 000 000, 10 000 000 y 100 000 000, y double_loop con n = 1 000, 3 000 y 10 000, e imprime una tabla. Para medir uso la función medir que venía dada, a la que le paso el nombre de la función como puntero a función.
 
-**Con la terminal:**
+Mis tiempos en C:
 
-```
-cd dungeon-quest
-git init -b main
-git add .
-git commit -m "Lab 06: plantilla inicial"
-```
+| Función     |        n         |  Segundos    |                 
+| ----------- | ---------------- | ------------ |
+| simple_loop | 	1 000 000      | 	  0.003     |
+| simple_loop | 	10 000 000     |    0.024     |
+| simple_loop | 	100 000 000    | 	  0.239     |
+| double_loop |    1 000         |   0.002      |
+| double_loop | 	3 000          |	  0.024     |
+| double_loop | 	10 000         | 	  0.237     |
 
-Luego, en <https://github.com/new>, crea un repositorio **vacío** llamado `dungeon-quest`,
-**privado**, sin README, sin `.gitignore` y sin licencia (ya los tienes). Y conéctalo:
 
-```
-git remote add origin https://github.com/TU_USUARIO/dungeon-quest.git
-git push -u origin main
-```
+### El guardián (guardian.c)
 
-### 3. Dale acceso al profesor
+Informe y pruebas
 
-En GitHub, entra a tu repositorio → **Settings → Collaborators → Add people** y agrega al
-profesor. **Sin esto no puede ver tu trabajo y no puede corregirlo.**
+- El desbordamiento: fibonacci(93) imprime un número negativo (-6246583658587674878) porque el resultado real no cabe en un long long y "da la vuelta". Lo expliqué en docs/informe_lab06.md.
+
+- Rompí el compilador a propósito con cinco errores distintos y anoté los mensajes en el informe.
+
+- Resultado de las pruebas: Lab 06: 18 de 18 pruebas pasan.
 
 ---
 
-## La meta
+## Lab 07 — La mochila
 
-Al terminar el semestre, `make` produce un único programa, `dungeon`, desde cuyo menú:
+### inventario.c
 
-- creas un **héroe** con un inventario que crece en memoria,
-- exploras un dungeon lleno de **enemigos** y peleas contra un jefe,
-- organizas la **herrería** y el **orden de marcha** de tu grupo,
-- recorres un **mapa** y calculas una tabla de daño con matrices,
-- haces crecer un **bosque fractal** que se dibuja como imagen y evoluciona,
-- ordenas miles de héroes en un **Salón de la Fama** y mides qué algoritmo gana,
-- guardas a tus aventureros en un **Registro del Gremio** con búsqueda instantánea,
-- y **guardas la crónica de tu partida comprimida**, con un compresor que escribiste tú.
+Aquí empecé a manejar memoria dinámica. En Python una lista crece sola con append; en C hay que pedir memoria con malloc/realloc y devolverla con free.
 
-Esa crónica la va escribiendo el propio juego desde la semana 11 (Lab 10). En la última semana, el
-compresor del Lab 13 comprime exactamente lo que tu juego escribió durante el semestre.
+Lo que implementé:
+
+- inventario_agregar: agrega un item al final. La mochila empieza vacía (puntero en NULL, cantidad 0, capacidad 0). La primera vez pido espacio para 2 items con malloc, y cuando se llena duplico la capacidad con realloc. Uso una variable nueva para el resultado de realloc, así, si no hay memoria, no pierdo la mochila que ya tenía.
+
+- Recibo Item **inv (puntero a puntero) porque realloc puede mover la mochila a otra dirección y la función tiene que poder cambiar el puntero de quien la llama.
+
+- Cada item guarda su propia copia del nombre (con una función auxiliar copiar_texto que usa malloc + strcpy), no un puntero al texto original.
+
+- inventario_peso: suma los pesos de todos los items.
+
+- inventario_imprimir: muestra un item por línea con su tipo (usando un switch), su nombre y su peso, y al final el peso total. Si la mochila está vacía, avisa.
+
+- inventario_liberar: primero libera cada nombre y después el arreglo. Un free por cada malloc.
+
+En main.c agregué la opción 4 del menú ("El inventario del heroe"), que crea una mochila con tres objetos, la imprime y la libera. Compila bien, no existen fugas de memoria.
+
+
+---
+## Lab 08 — Bestiario y combate
+
+### Bestiario: lista enlazada (bestiario.c)
+
+Los enemigos ya no van en un arreglo sino en nodos sueltos, donde cada uno apunta al siguiente. Implementé:
+
+- bestiario_agregar: agrega al final. Si la lista está vacía, el nuevo nodo pasa a ser la cabeza; si no, recorro hasta el último nodo y lo enlazo ahí.
+
+- bestiario_insertar: inserta en la posición pos. Si pos es 0 o negativa (o la lista está vacía), va al principio; si pos es mayor que el largo, va al final. Para el caso del medio me paro en el nodo anterior y cambio dos punteros, sin mover a los demás.
+
+- bestiario_purgar: borra a todos los enemigos con vida ≤ 0. Lo hice en dos pasos: primero borro los muertos que estén al principio (porque eso cambia la cabeza), y después recorro el resto y salto los nodos muertos. Libero siempre el nombre y luego el nodo.
+
+- bestiario_liberar: recorre la lista guardando el siguiente antes de liberar cada nodo.
+
+- bestiario_imprimir, copiar_texto y nuevo_enemigo venían dadas.
+
+**Igual que con la mochila, uso NodoEnemigo cabeza porque agregar al inicio o purgar al primero cambia la cabeza.**
+
+
+### Combate (combate.c)
+
+combate_pelear hace pelear al héroe contra un enemigo por turnos. El héroe golpea primero; si el enemigo queda con vida ≤ 0 gana el héroe, y si no, el enemigo contraataca. Devuelve 1 si gana el héroe y 0 si pierde. Cubrí los casos borde: punteros NULL, héroe o enemigo que ya estén muertos, y el caso en que ninguno puede hacer daño (los dos ataques ≤ 0), donde el héroe se retira para no caer en un bucle infinito. Las vidas se modifican directamente porque paso punteros.
+
+#### Opción 5 del menú: "Explorar el dungeon"
+
+En main.c armé el bestiario (Goblin, Orco, Dragón, y el Esqueleto insertado en la posición 1), lo imprimo, hago pelear al héroe contra cada enemigo en orden, y al final purgo a los derrotados y libero todo. 
 
 ---
 
-## La hoja de ruta
-
-Cada laboratorio agrega un **módulo** (un `.h` en `include/` y un `.c` en `src/`) y una **opción
-al menú** de `src/main.c`.
-
-| Semana | Lab | Lo que agregas | Lo que aprendes |
-|---|---|---|---|
-| 6 | 06 | `hechizos`, `cronometro`, `guardian` | compilar, tipos, `switch`, `rand`, git |
-| 7–8 | 07 | `inventario`, `bestiario`, `combate` | `struct`, `malloc`/`free`, listas enlazadas |
-| 9 | 08 | `herreria`, `formacion` | colas, listas doblemente enlazadas |
-| 10 | 09 | `mapa` | matrices, aritmética de punteros |
-| 11–12 | 10 | `fractal`, `cronica`, y luego la pila y la mutación | recursión, archivos, pilas |
-| 13–14 | 11 | `ordenar`, el Salón de la Fama | ordenamiento, medir algoritmos |
-| 15 | 12 | `gremio` | índices, búsqueda binaria, borrado lógico |
-| 16 | 13 | `huffman` | árboles, colas de prioridad, bits |
-
----
-
-## Cómo está organizado
-
-```
-dungeon-quest/
-├── README.md        este archivo
-├── Makefile         para compilar con  make
-├── compilar.bat     lo mismo, en Windows sin make
-├── probar.bat       las pruebas, en Windows sin make
-├── include/         los .h — QUÉ existe            (las vitrinas)
-├── src/             los .c — CÓMO funciona          (los talleres)
-│   └── main.c       el menú de La Posada: crece cada semana
-├── tests/           las pruebas de cada laboratorio
-├── datos/           archivos que lee el juego
-└── docs/            tus informes, uno por laboratorio
-```
-
-**La regla:** un módulo = un `.h` en `include/` + un `.c` en `src/`, con el mismo nombre.
-`guardian.h` ↔ `guardian.c`. Nunca se incluye un `.c`: se incluye su `.h`.
-
----
-
-## Compilar y probar
-
-**Mac, Linux, o la terminal "MSYS2 UCRT64" de Windows:**
-
-```
-make            compila el juego
-./dungeon       lo ejecuta
-make test       corre las pruebas
-make limpiar    borra lo compilado
-```
-
-**Windows desde PowerShell o cmd** (o con doble clic):
-
-```
-.\compilar.bat
-.\dungeon.exe
-.\probar.bat
-```
-
-Las dos formas usan exactamente las mismas banderas:
-
-```
-gcc -Wall -Wextra -std=c99 -Iinclude ...
-```
-
-### Las pruebas
-
-Cada laboratorio trae un archivo `tests/test_labNN.c`. Lo copias a tu carpeta `tests/` y corres
-las pruebas. **Tu meta de la semana es que pasen todas:**
-
-```
-  Lab 06: 18 de 18 pruebas pasan
-
-  TODAS LAS PRUEBAS PASAN
-```
-
-No modifiques los archivos de `tests/`. Son el criterio de corrección.
-
----
-
-## Entregar cada semana
-
-Al final de cada sesión, y cada vez que avances en casa:
-
-```
-git add .
-git commit -m "Lab 06: guardian terminado"
-git push
-```
-
-Cuando el laboratorio esté listo, **márcalo con una etiqueta** y súbela:
-
-```
-git tag lab06
-git push origin lab06
-```
-
-**La etiqueta es la entrega.** El profesor corrige el estado de tu repositorio en la etiqueta
-`labNN`, no lo que haya después. Si la pones antes de terminar, se corrige lo que había.
-
----
-
-## Reglas del proyecto
-
-1. **Compila sin un solo warning** con `-Wall -Wextra`. Un warning es un error que todavía no
-   te ha mordido.
-2. **Todas las pruebas pasan** antes de poner la etiqueta.
-3. **Un `free` por cada `malloc`** (desde el Lab 07). Un `fclose` por cada `fopen` (desde el 10).
-4. **La entrada de teclado se lee con `get_int` o `get_texto`**, nunca con `scanf` a secas.
-5. **Comentarios sin acentos** en los `.c` y `.h`: la consola de Windows los muestra mal.
-6. **Commits pequeños y con mensaje que diga algo.** `"avance"` no dice nada;
-   `"Lab 07: inventario crece con realloc"` sí.
-7. **No toques lo que viene dado** (`entrada`, `tests/`). Si algo dado falla, avísale al profesor.
-
----
-
-## Si algo no funciona
-
-| Síntoma | Causa probable |
-|---|---|
-| `make: command not found` | estás en PowerShell: usa `compilar.bat`, o abre la terminal UCRT64 |
-| `undefined reference to 'mcd'` | el `.h` promete la función pero falta su `.c`, o la escribiste con otro nombre |
-| `implicit declaration of function` | falta el `#include` del `.h` |
-| `multiple definition of` | incluiste un `.c`, o a un `.h` le falta el include guard |
-| las pruebas no compilan | algún módulo tuyo tiene errores: `make` primero, y arregla de arriba hacia abajo |
+## Historial de commits
+- 3d67e02 Lab 08
+- e647a0c Lab 07
+- 456f062 Lab 06 completado
