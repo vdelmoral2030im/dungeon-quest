@@ -22,6 +22,8 @@
 #include "hechizos.h"
 #include "cronometro.h"
 #include "guardian.h"
+#include "bestiario.h"
+#include "combate.h"
 
 /* Prototipos: C lee de arriba a abajo. Si main() llama a una funcion que
  * esta escrita mas abajo, hay que anunciarla aqui o el compilador dice
@@ -29,6 +31,7 @@
 static void mostrar_menu(void);
 static void ver_hechizos(void);
 static void ver_inventario(void);
+static void explorar_dungeon(void);
 
 int main(void)
 {
@@ -60,6 +63,11 @@ int main(void)
                 pausa();
                 break;
 
+            case 5:
+                explorar_dungeon();
+                pausa();
+                break;
+
             case 0:
                 printf("\n   Hasta la proxima, aventurero.\n\n");
                 break;
@@ -82,6 +90,7 @@ static void mostrar_menu(void)
     printf("    2) El cronometro: C contra Python\n");
     printf("    3) La puerta del guardian\n");
     printf("    4) El inventario del heroe\n");
+    printf("    5) Explorar el dungeon\n");
     printf("    0) Salir\n\n");
 }
 
@@ -112,4 +121,39 @@ static void ver_inventario(void)
 
     inventario_imprimir(mochila, cantidad);
     inventario_liberar(mochila, cantidad);
+}
+
+static void explorar_dungeon(void)
+{
+    printf("\n   --- Explorar el dungeon ---\n\n");
+
+    Luchador heroe = {"Aventurero", 60, 12};
+    NodoEnemigo *bestiario = NULL;
+
+    bestiario_agregar(&bestiario, "Goblin", 20, 4);
+    bestiario_agregar(&bestiario, "Orco", 35, 8);
+    bestiario_insertar(&bestiario, 1, "Esqueleto", 15, 5);
+    bestiario_agregar(&bestiario, "Dragon", 100, 25);
+
+    printf("   Enemigos en el dungeon:\n");
+    bestiario_imprimir(bestiario);
+    printf("\n   %s entra con %d de vida y %d de ataque.\n\n",
+           heroe.nombre, heroe.vida, heroe.ataque);
+
+    for (NodoEnemigo *e = bestiario; e != NULL && heroe.vida > 0; e = e->siguiente) {
+        printf("   Combate contra %s (vida %d, ataque %d)... ",
+               e->nombre, e->vida, e->ataque);
+        if (combate_pelear(&heroe, e)) {
+            printf("Victoria! (Vida restante del heroe: %d)\n", heroe.vida);
+        } else {
+            printf("Derrota! El heroe ha caido.\n");
+        }
+    }
+
+    bestiario_purgar(&bestiario);
+
+    printf("\n   Supervivientes en el dungeon tras purgar derrotados:\n");
+    bestiario_imprimir(bestiario);
+
+    bestiario_liberar(bestiario);
 }
