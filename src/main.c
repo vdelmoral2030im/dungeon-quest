@@ -24,6 +24,8 @@
 #include "guardian.h"
 #include "bestiario.h"
 #include "combate.h"
+#include "herreria.h"
+#include "formacion.h"
 
 /* Prototipos: C lee de arriba a abajo. Si main() llama a una funcion que
  * esta escrita mas abajo, hay que anunciarla aqui o el compilador dice
@@ -32,6 +34,8 @@ static void mostrar_menu(void);
 static void ver_hechizos(void);
 static void ver_inventario(void);
 static void explorar_dungeon(void);
+static void ver_herreria(void);
+static void ver_formacion(void);
 
 int main(void)
 {
@@ -68,6 +72,16 @@ int main(void)
                 pausa();
                 break;
 
+            case 6:
+                ver_herreria();
+                pausa();
+                break;
+
+            case 7:
+                ver_formacion();
+                pausa();
+                break;
+
             case 0:
                 printf("\n   Hasta la proxima, aventurero.\n\n");
                 break;
@@ -84,13 +98,15 @@ int main(void)
 static void mostrar_menu(void)
 {
     printf("\n   ==========================================\n");
-    printf("      DUNGEON QUEST  -  La Posada\n");
+    printf("       DUNGEON QUEST  -  La Posada\n");
     printf("   ==========================================\n");
     printf("    1) Los hechizos del Lab 01, en C\n");
     printf("    2) El cronometro: C contra Python\n");
     printf("    3) La puerta del guardian\n");
     printf("    4) El inventario del heroe\n");
     printf("    5) Explorar el dungeon\n");
+    printf("    6) La herreria\n");
+    printf("    7) La formacion\n");
     printf("    0) Salir\n\n");
 }
 
@@ -156,4 +172,52 @@ static void explorar_dungeon(void)
     bestiario_imprimir(bestiario);
 
     bestiario_liberar(bestiario);
+}
+
+static void ver_herreria(void)
+{
+    printf("\n   --- La herreria ---\n\n");
+    Herreria h;
+    char atendido[LARGO_PEDIDO];
+
+    herreria_iniciar(&h);
+    herreria_encolar(&h, "Espada larga");
+    herreria_encolar(&h, "Escudo de roble");
+    herreria_encolar(&h, "Casco de acero");
+
+    herreria_imprimir(&h);
+
+    if (herreria_atender(&h, atendido)) {
+        printf("\n   Atendido: %s\n", atendido);
+    }
+
+    printf("\n   Pedidos restantes:\n");
+    herreria_imprimir(&h);
+
+    herreria_liberar(&h);
+}
+
+static void ver_formacion(void)
+{
+    printf("\n   --- La formacion ---\n\n");
+    Formacion f;
+
+    formacion_iniciar(&f);
+    formacion_insertar_inicio(&f, "Ana");
+    formacion_insertar_final(&f, "Beto");
+    formacion_insertar_final(&f, "Caro");
+
+    formacion_imprimir(&f);
+    formacion_imprimir_reversa(&f);
+
+    printf("\n   Esta 'Beto'? %s\n", formacion_contiene(&f, "Beto") ? "Si" : "No");
+
+    if (formacion_eliminar(&f, "Beto")) {
+        printf("   Se elimino a 'Beto'.\n\n");
+    }
+
+    formacion_imprimir(&f);
+    formacion_imprimir_reversa(&f);
+
+    formacion_liberar(&f);
 }

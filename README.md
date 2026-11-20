@@ -100,6 +100,38 @@ En main.c armé el bestiario (Goblin, Orco, Dragón, y el Esqueleto insertado en
 
 ---
 
+---
+
+## Lab 09 — La Herrería y la Formación
+
+### La herrería: cola FIFO (herreria.c)
+
+Implementé una cola con punteros `head` y `tail` para operaciones en $O(1)$:
+
+- `herreria_encolar`: crea un `Pedido` con `malloc`, copia el nombre con `strncpy` asegurando `'\0'` al final y lo agrega por `tail` (o asigna `head` y `tail` si estaba vacía).
+- `herreria_atender`: saca por `head`, copia el pedido a `destino`, avanza `head` y, si queda `NULL`, pone `tail = NULL` antes de hacer `free` y decrementar `cantidad`.
+- `herreria_liberar`: recorre desde `head` guardando `sig` antes de cada `free` y reinicia la estructura con `herreria_iniciar`.
+
+**¿Qué pasa si `atender` no actualiza `tail` cuando sale el último pedido?**  
+Si `atender` no pone `tail = NULL` al vaciar la cola, `tail` queda apuntando a memoria ya liberada. Al encolar un nuevo pedido después, `tail->sig` escribe sobre un nodo liberado y `head` no se actualiza con el nuevo elemento.
+
+### La formación: lista doblemente enlazada (formacion.c)
+
+Completé las operaciones de la lista doble manteniendo siempre los enlaces `ant` y `sig` emparejados:
+
+- `formacion_insertar_final`: espejo de `insertar_inicio`, agregando detrás de `ultimo` (`m->ant = f->ultimo` y `f->ultimo->sig = m`) o inicializando ambos extremos si estaba vacía.
+- `formacion_contiene`: recorre de `primero` a `ultimo` comparando nombres con `strcmp`.
+- `formacion_eliminar`: busca el nodo y reenlaza sus vecinos cubriendo los cuatro casos (medio, primero, último y único) antes de liberar y restar `cantidad`.
+- `formacion_imprimir_reversa_rec` (bono): imprime la fila al revés usando recursión por `sig` sin recurrir a `ant`.
+
+#### Opciones 6 y 7 del menú (`main.c`)
+
+Agregué la opción `6) La herreria` y la opción `7) La formacion` en `main.c` con sus respectivas funciones auxiliares y `pausa()`.
+
+---
+
+---
+
 ## Historial de commits
 - 3d67e02 Lab 08
 - e647a0c Lab 07
