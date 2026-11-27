@@ -132,7 +132,33 @@ Agregué la opción `6) La herreria` y la opción `7) La formacion` en `main.c` 
 
 ---
 
-## Historial de commits
-- 3d67e02 Lab 08
-- e647a0c Lab 07
-- 456f062 Lab 06 completado
+## Lab 10 — El Cartógrafo
+
+Aquí hice lo contrario del Lab 09: en vez de nodos sueltos unidos por punteros, una matriz, donde todo está pegado en memoria. El mapa del dungeon es un `char mapa[8][12]` y la tabla de daño sale de multiplicar dos matrices de `int`.
+
+### El mapa (mapa.c)
+
+- `mapa_celda`: devuelve el símbolo de la casilla `(fila, col)` usando solo punteros, sin corchetes: `*(*(mapa + fila) + col)`. Primero compruebo si la casilla está fuera del mapa (`fila < 0`, `fila >= MAPA_FILAS`, `col < 0` o `col >= MAPA_COLS`) y en ese caso devuelvo `'\0'` sin leer la memoria. Uso `>=` y no `>` porque los índices van de 0 a `MAPA_FILAS - 1`.
+- `mapa_contar`: dos `for` anidados (filas y columnas) que llaman a `mapa_celda` y suman 1 cada vez que la casilla es igual al símbolo buscado. En el nivel 1 hay 3 enemigos (`E`) y 2 tesoros (`T`).
+- `mapa_cargar`, `mapa_imprimir`, `mapa_imprimir_memoria` y `matriz_imprimir` venían dadas.
+
+### La tabla de daño (mapa.c)
+
+`matriz_multiplicar(A, fa, ca, B, fb, cb, C)` calcula `C = A x B`, donde `A` son héroes × atributos y `B` atributos × enemigos, así que `C[i][j]` es el daño del héroe `i` al enemigo `j`.
+
+- **Precondición primero:** si `ca != fb`, o si alguna dimensión queda fuera de `1..MAT_MAX`, hago `return 0` antes de los `for`. Así se cancela de verdad: `C` queda intacta. Imprimir un error y seguir calculando no habría sido cancelar.
+- **Tres `for` anidados:** `i` recorre los héroes, `j` los enemigos y `k` los atributos. Pongo `C[i][j] = 0;` justo antes del `for` de `k`, porque `C` puede venir con basura, y después acumulo `C[i][j] += A[i][k] * B[k][j];`.
+- Al final `return 1;`, para que la función devuelva un valor en todos los caminos.
+
+Lo comprobé a mano con el ejemplo de la guía: `[[3,1],[2,4]] x [[2,0],[5,3]] = [[11,3],[24,12]]`.
+
+#### Opción 8 del menú: "El mapa del cartografo"
+
+En `main.c` agregué `#include "mapa.h"`, el prototipo de `ver_mapa`, la línea `8) El mapa del cartografo` en `mostrar_menu` y el `case 8` con su `pausa()`. `ver_mapa()` carga y dibuja el mapa, cuenta enemigos y tesoros con `mapa_contar`, muestra las direcciones de memoria con `mapa_imprimir_memoria` y multiplica dos matrices 3×3 (héroes × atributos por atributos × enemigos) para mostrar la tabla de daño con `matriz_imprimir`.
+
+Resultado de las pruebas: Lab 10: 22 de 22 pruebas pasan, y compila sin warnings.
+
+### Pregunta: ¿cuántos bytes hay entre `mapa[0][11]` y `mapa[1][0]`, y por qué?
+
+Hay **1 byte**. Aunque pensamos en el mapa como una cuadrícula de 8 filas, en memoria son 96 casillas seguidas, una fila detrás de otra (*row-major*), y `mapa[i][j]` está en la casilla `i * 12 + j`. `mapa[0][11]` es la casilla 11, el último elemento de la fila 0, y `mapa[1][0]` es la casilla 12, la primera de la fila 1. Son vecinas, y como un `char` ocupa 1 byte, la diferencia es 1 byte. La tabla de direcciones de la opción 8 lo muestra: `mapa[0][11]` termina en `...bb` y `mapa[1][0]` empieza en `...bc`.
+

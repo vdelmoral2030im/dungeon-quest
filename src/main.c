@@ -26,6 +26,7 @@
 #include "combate.h"
 #include "herreria.h"
 #include "formacion.h"
+#include "mapa.h"
 
 /* Prototipos: C lee de arriba a abajo. Si main() llama a una funcion que
  * esta escrita mas abajo, hay que anunciarla aqui o el compilador dice
@@ -36,6 +37,7 @@ static void ver_inventario(void);
 static void explorar_dungeon(void);
 static void ver_herreria(void);
 static void ver_formacion(void);
+static void ver_mapa(void);
 
 int main(void)
 {
@@ -82,6 +84,11 @@ int main(void)
                 pausa();
                 break;
 
+            case 8:
+                ver_mapa();
+                pausa();
+                break;
+
             case 0:
                 printf("\n   Hasta la proxima, aventurero.\n\n");
                 break;
@@ -107,6 +114,7 @@ static void mostrar_menu(void)
     printf("    5) Explorar el dungeon\n");
     printf("    6) La herreria\n");
     printf("    7) La formacion\n");
+    printf("    8) El mapa del cartografo\n");
     printf("    0) Salir\n\n");
 }
 
@@ -220,4 +228,37 @@ static void ver_formacion(void)
     formacion_imprimir_reversa(&f);
 
     formacion_liberar(&f);
+}
+
+static void ver_mapa(void)
+{
+    printf("\n   --- El mapa del cartografo ---\n\n");
+    char mapa[MAPA_FILAS][MAPA_COLS];
+
+    mapa_cargar(mapa);
+    mapa_imprimir(mapa);
+
+    printf("\n   Enemigos: %d    Tesoros: %d\n",
+           mapa_contar(mapa, 'E'), mapa_contar(mapa, 'T'));
+
+    printf("\n   --- La matriz en memoria ---\n\n");
+    mapa_imprimir_memoria(mapa);
+
+    /* Tabla de dano: heroes x atributos por atributos x enemigos */
+    int heroes[MAT_MAX][MAT_MAX]   = { {3, 1, 2}, {2, 4, 1}, {5, 0, 3} };
+    int enemigos[MAT_MAX][MAT_MAX] = { {2, 0, 1}, {5, 3, 2}, {1, 4, 0} };
+    int dano[MAT_MAX][MAT_MAX];
+
+    printf("\n   --- La tabla de dano (heroes x enemigos) ---\n\n");
+    printf("   Heroes x atributos:\n");
+    matriz_imprimir(heroes, 3, 3);
+    printf("   Atributos x enemigos:\n");
+    matriz_imprimir(enemigos, 3, 3);
+
+    if (matriz_multiplicar(heroes, 3, 3, enemigos, 3, 3, dano)) {
+        printf("   Dano de cada heroe a cada enemigo:\n");
+        matriz_imprimir(dano, 3, 3);
+    } else {
+        printf("   No se pueden multiplicar esas matrices.\n");
+    }
 }
